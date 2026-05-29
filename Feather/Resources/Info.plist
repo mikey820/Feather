@@ -20,6 +20,7 @@
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>thewonderofyou.Feather.ipa</string>
+				<string>com.apple.itunes.ipa</string>
 			</array>
 		</dict>
 		<dict>

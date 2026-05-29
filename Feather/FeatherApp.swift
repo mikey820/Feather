@@ -130,13 +130,25 @@ struct FeatherApp: App {
 			}
 		} else {
 			if url.pathExtension == "ipa" || url.pathExtension == "tipa" {
-				if FileManager.default.isFileFromFileProvider(at: url) {
-					guard url.startAccessingSecurityScopedResource() else { return }
-					FR.handlePackageFile(url) { _ in }
-				} else {
-					FR.handlePackageFile(url) { _ in }
+				let needsScope = FileManager.default.isFileFromFileProvider(at: url)
+				if needsScope {
+					_ = url.startAccessingSecurityScopedResource()
 				}
-				
+
+				FR.handlePackageFile(url) { error in
+					if needsScope {
+						url.stopAccessingSecurityScopedResource()
+					}
+					if let error = error {
+						DispatchQueue.main.async {
+							UIAlertController.showAlertWithOk(
+								title: .localized("Error"),
+								message: error.localizedDescription
+							)
+						}
+					}
+				}
+
 				return
 			}
 		}

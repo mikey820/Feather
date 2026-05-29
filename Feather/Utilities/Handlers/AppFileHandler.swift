@@ -108,21 +108,28 @@ final class AppFileHandler: NSObject, @unchecked Sendable {
 	
 	func addToDatabase() async throws {
 		let app = try await _directory()
-		
+
 		guard let appUrl = _fileManager.getPath(in: app, for: "app") else {
 			return
 		}
-		
+
 		let bundle = Bundle(url: appUrl)
-		
-		Storage.shared.addImported(
-			uuid: _uuid,
-			appName: bundle?.name,
-			appIdentifier: bundle?.bundleIdentifier,
-			appVersion: bundle?.version,
-			appIcon: bundle?.iconFileName
-		) { _ in
-			Logger.misc.info("[\(self._uuid)] Added to database")
+		let name = bundle?.name
+		let identifier = bundle?.bundleIdentifier
+		let version = bundle?.version
+		let icon = bundle?.iconFileName
+		let uuid = _uuid
+
+		await MainActor.run {
+			Storage.shared.addImported(
+				uuid: uuid,
+				appName: name,
+				appIdentifier: identifier,
+				appVersion: version,
+				appIcon: icon
+			) { _ in
+				Logger.misc.info("[\(uuid)] Added to database")
+			}
 		}
 	}
 	
